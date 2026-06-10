@@ -1,0 +1,6 @@
+{
+  "name": "Investment Yield Simulator with AI",
+  "description": "Multi-asset investment simulator under Ukrainian financial laws with interactive charts and AI-powered expert portfolio auditing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
