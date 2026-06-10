@@ -20,3 +20,7 @@ export default defineConfig(() => {
     },
   };
 });
+export default defineConfig({
+  base: '/FinCalcCompl/', // Назва твого репозиторію з косими рисками з обох боків
+  // ...інші налаштування
+})
