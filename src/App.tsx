@@ -168,6 +168,7 @@ export default function App() {
   // AI consultant auditing
   const [aiLoading, setAiLoading] = useState<boolean>(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [aiTips, setAiTips] = useState<string[] | null>(null);
   const [aiLoadingStep, setAiLoadingStep] = useState<string>("");
 
   // Fetch verified online macroeconomic indicators with robust retry mechanisms
@@ -1419,6 +1420,7 @@ export default function App() {
   const handleAiConsulting = async () => {
     setAiLoading(true);
     setAiResponse(null);
+    setAiTips(null);
     setAiLoadingStep("🔍 Аналізуємо податкові наслідки за законодавством України...");
 
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -1465,6 +1467,7 @@ export default function App() {
         const data = await res.json();
         if (data.success) {
           setAiResponse(data.analysis);
+          setAiTips(data.tips || []);
         } else {
           setAiResponse(`❌ Помилка: ${data.error}`);
         }
@@ -2319,6 +2322,28 @@ export default function App() {
                       <p className="text-[10px] text-slate-400">Аналіз проведено відповідно до ПКУ та економічного клімату в Україні на 2026 р.</p>
                     </div>
                   </div>
+
+                  {aiTips && aiTips.length > 0 && (
+                    <div className="bg-gradient-to-r from-amber-500/10 to-indigo-500/10 border border-amber-500/25 rounded-xl p-4 md:p-4.5 space-y-3 shadow-inner my-2">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <h5 className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 font-display">
+                          3 головні фінансові поради
+                        </h5>
+                      </div>
+                      <ul className="space-y-2 list-none pl-0">
+                        {aiTips.map((tip, idx) => (
+                          <li key={idx} className="text-xs text-slate-250 flex items-start gap-3">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-lg bg-amber-500/10 border border-amber-500/35 text-amber-400 text-[10px] font-bold font-mono shrink-0 mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span className="leading-snug text-slate-300 font-medium">{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <div className="text-xs text-slate-300 leading-relaxed overflow-y-auto max-h-[450px] pr-2 markdown-body list-disc pl-3 prose prose-invert prose-xs">
                     <ReactMarkdown>{aiResponse || ""}</ReactMarkdown>
                   </div>

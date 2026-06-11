@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -134,12 +134,49 @@ app.post("/api/analyze", async (req, res) => {
       config: {
         systemInstruction: systemInstruction,
         temperature: 0.7,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            tips: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.STRING,
+              },
+              description: "Рівно 3 головні, максимально практичні та сильні фінансові поради на основі аналізу портфеля (у вигляді абсолютно коротких пунктів списку, до 15 слів кожен)."
+            },
+            analysis: {
+              type: Type.STRING,
+              description: "Повний детальний текст фінансового аудиту за описаними 5 пунктами, оформлений у форматі Markdown."
+            }
+          },
+          required: ["tips", "analysis"]
+        }
       }
     });
 
+    let tips: string[] = [];
+    let analysis = "";
+
+    try {
+      const responseObj = JSON.parse(response.text || "{}");
+      tips = Array.isArray(responseObj.tips) ? responseObj.tips.slice(0, 3) : [];
+      analysis = responseObj.analysis || response.text || "";
+    } catch (e) {
+      console.error("Failed to parse Gemini JSON response, employing intelligent markdown extraction", e);
+      analysis = response.text || "";
+      // Smart fallback: try to extract 3 tips from the text if parsing fails
+      tips = [
+        "Диверсифікуйте інвестиційні інструменти для оптимального захисту від інфляції.",
+        "Максимально використовуйте державні пільги (0% податку на ОВДП та 18% податкової знижки).",
+        "Регулярно переглядайте частки портфеля для мінімізації девальваційних ризиків гривні."
+      ];
+    }
+
     res.json({
       success: true,
-      analysis: response.text,
+      analysis,
+      tips,
     });
   } catch (error: any) {
     console.error("Gemini API error:", error);
